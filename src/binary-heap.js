@@ -1,4 +1,18 @@
 /**
+ * Define some common operations. The fact that these are functions almost
+ * certainly slows down the rebalancing operations, but assuming the heap sizes are
+ * relatively small and not used for e.g. graphics or audio processing,
+ * the cost of looking up and calling these functions should be minimal.
+ * Technically a perf. test should be tried.
+ */
+const resolveParentIndex = i => i >> 1;
+const getLeftChildIndex = i => i << 1;
+const getRightChildIndex = i => getLeftChildIndex(i) + 1;
+
+// es6 swap
+const swap = (list, a, b) => [ list[a], list[b] ] = [ list[b], list[a] ];
+
+/**
  * Minimum key binary heap. The smallest key
  * is in front, and therefore will be processed
  * first.
@@ -18,16 +32,16 @@ class BinaryHeap {
   }
 
   propagateUp(index) {
-    while ((index >> 1) > 0) {
+    while (resolveParentIndex(index) > 0) {
       const node = this.items[index];
-      const parentNode = this.items[index >> 1];
+      const parentNode = this.items[resolveParentIndex(index)];
 
       if (node < parentNode) {
-        this.items[index >> 1] = node;
+        this.items[resolveParentIndex(index)] = node;
         this.items[index] = parentNode;
       }
 
-      index = index >> 1;
+      index = resolveParentIndex(index);
     }
   }
 
@@ -47,7 +61,7 @@ class BinaryHeap {
    * @returns {*} The parent node
    */
   findParentNode(index) {
-    return this.items[index >> 1];
+    return this.items[resolveParentIndex(index)];
   }
 
   /**
@@ -69,20 +83,23 @@ class BinaryHeap {
   }
 
   minChild(parentIndex) {
+    const leftIndex = getLeftChildIndex(parentIndex);
+    const rightIndex = getRightChildIndex(parentIndex);
+
     // The parent node is the terminal parent in the tree,
     // and it has only one child, so return that child's index
-    if (parentIndex * 2 + 1 > this.items.length) {
-      return parentIndex * 2;
+    if (rightIndex > this.items.length) {
+      return leftIndex;
     }
 
     // The parent node's left child is smaller than the right child,
     // so that is the minimum child to be returned
-    if (this.items[parentIndex * 2] < this.items[parentIndex * 2 + 1]) {
-      return parentIndex * 2;
+    if (this.items[leftIndex] < this.items[rightIndex]) {
+      return leftIndex;
     }
 
     // The right child of the parent node is the smallest, so return its index
-    return parentIndex * 2 + 1;
+    return rightIndex;
   }
 
   propagateDown(index) {
@@ -90,9 +107,7 @@ class BinaryHeap {
       const smallest = this.minChild(index);
 
       if (this.items[index] > this.items[smallest]) {
-        const temp = this.items[index];
-        this.items[index] = this.items[smallest];
-        this.items[smallest] = temp;
+        swap(this.items, index, smallest);
       } 
       
       index = smallest;
