@@ -41,7 +41,7 @@ class BinaryHeap {
     // This is done so that integer division will
     // properly resolve the parent of a given node.
     this.items = [0];
-    this.compareNodes = comparator;
+    this.compareNodes = comparator ? comparator : isMinValue;
   }
 
   /**
