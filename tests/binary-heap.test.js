@@ -28,11 +28,11 @@ describe('BinaryHeap', () => {
 
   describe('.insert', () => {
     it('inserts smaller elements above its initial parent node', () => {
-      heap.build([
-        5, 9, 11, 14, 18, 19, 21, 33, 17, 40, 7
-      ]);
+      heap.insert(5);
+      heap.insert(40);
+      heap.insert(9);
 
-      expect(heap.items).to.deep.equal([0, 5, 7, 11, 14, 9, 19, 21, 33, 17, 40, 18]);
+      expect(heap.items).to.deep.equal([0, 5, 40, 9]);
     });
   });
 
@@ -57,7 +57,7 @@ describe('BinaryHeap', () => {
 
     it('returns the smallest element', () => {  
       expect(heap.delMin()).to.equal(5);
-      expect(heap.findMin()).to.equal(9);
+      expect(heap.peek()).to.equal(9);
     });
 
     it('preserves the order of the heap', () => {
@@ -75,11 +75,11 @@ describe('BinaryHeap', () => {
     });
   });
 
-  describe('.findMin', () => {
+  describe('.peek', () => {
     it('returns the first item in the list, without removing it', () => {
       heap.build([5,9,11]);
 
-      expect(heap.findMin()).to.equal(5);
+      expect(heap.peek()).to.equal(5);
       expect(heap.items[1]).to.equal(5);
     });
   });

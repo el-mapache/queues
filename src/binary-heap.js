@@ -13,6 +13,18 @@ const getRightChildIndex = i => getLeftChildIndex(i) + 1;
 const swap = (list, a, b) => [ list[a], list[b] ] = [ list[b], list[a] ];
 
 /**
+ * Default comparator function to determine if the first node is the minimum
+ * value node. This is only useful if you are using the binary heap to store
+ * integers, which would probably be of dubious value. This method should
+ * be overwritten by all implementations that need to store additional data.
+ *
+ * @param {Number} a The node we think might be the 'minimum value' node
+ * @param {Number} b Another node whose value we want to compare
+ * @returns {Boolean} Whether the first node is the minimum value node.
+ */
+const isMinValue = (a, b) => a < b;
+
+/**
  * Minimum key binary heap. The smallest key
  * is in front, and therefore will be processed
  * first.
@@ -23,20 +35,29 @@ const swap = (list, a, b) => [ list[a], list[b] ] = [ list[b], list[a] ];
  * with a right-shift of 1.
 */
 class BinaryHeap {
-  constructor() {
+  constructor(comparator = isMinValue) {
     // The heap is initialized with a single zero as
     // the first element in the list of items.
     // This is done so that integer division will
     // properly resolve the parent of a given node.
-    this.items = [0]
+    this.items = [0];
+    this.compareNodes = comparator;
   }
 
+  /**
+   * When a node is inserted into the heap, it is not guaranteed to be
+   * in the correct spot. If the node resolves to a higher priority than
+   * its parent, we swap the inserted node with the parent node. This
+   * operation continues until the node has been placed in the correct
+   * position in the heap.
+   * @param {Number} index The current index of the node to be moved up.
+   */
   propagateUp(index) {
     while (resolveParentIndex(index) > 0) {
       const node = this.items[index];
       const parentNode = this.items[resolveParentIndex(index)];
 
-      if (node < parentNode) {
+      if (this.compareNodes(node, parentNode)) {
         this.items[resolveParentIndex(index)] = node;
         this.items[index] = parentNode;
       }
@@ -69,7 +90,7 @@ class BinaryHeap {
    * 
    * @returns {*} The first element of the heap
    */
-  findMin() {
+  peek() {
     return this.items[1];
   }
 
@@ -82,6 +103,11 @@ class BinaryHeap {
     return this.items.pop();
   }
 
+  /**
+   * Given a node's index, the the index of its smallest child.
+   * @param {Number} parentIndex The index of the node who's minimum child we want to find
+   * @returns {Number} The index of the smallest child value
+   */
   minChild(parentIndex) {
     const leftIndex = getLeftChildIndex(parentIndex);
     const rightIndex = getRightChildIndex(parentIndex);
@@ -102,13 +128,19 @@ class BinaryHeap {
     return rightIndex;
   }
 
+  /**
+   * Rebalance the heap after a node is taken from the top. Ensures the
+   * top item is the smallest number (highest priority)
+   * @param {Number} index Move a node down, swapping with its children
+   *
+   */
   propagateDown(index) {
     while ((index * 2) <= this.items.length) {
       const smallest = this.minChild(index);
 
-      if (this.items[index] > this.items[smallest]) {
+      if (this.compareNodes(this.items[smallest], this.items[index])) {
         swap(this.items, index, smallest);
-      } 
+      }
       
       index = smallest;
     }
@@ -121,7 +153,7 @@ class BinaryHeap {
    * @returns {*} The first item in the heap
    */
   delMin() {
-    const first = this.findMin();
+    const first = this.peek();
     this.items[1] = this.delMax();
     this.propagateDown(1);
     
@@ -129,7 +161,7 @@ class BinaryHeap {
   }
 
   /**
-   * Helper methoid to determine if the list is empty
+   * Helper method to determine if the list is empty
    * 
    * @returns {Boolean} Whether the list is empty or not
    */
