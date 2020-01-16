@@ -70,7 +70,9 @@ class PriorityQueue {
     this.dequeue = this.dequeue.bind(this);
   }
 
-  push(handler, context = null, ...args) {}
+  push(handler, context = null, ...args) {
+    this.queue.insert(handler);
+  }
   dequeue() {}
   process() {}
 }
